@@ -1,11 +1,12 @@
-import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
+import pandas as pd
+
 
 
 ####
 # TODO: different colors of marks?
-
 ####
 
 
@@ -28,34 +29,36 @@ def addArrow(x, text, y, shiftx=0, length=0):
                  xytext=(x + shiftx, y + length),
                  rotation=90.,
                  xycoords='data',
-                 fontsize=10,
+                 fontsize=12,
                  verticalalignment='bottom',
                  horizontalalignment='center',
                  arrowprops=dict(width=1, facecolor='black', headwidth=4,
                                  shrink=0.1))
 
 
-def addEnergy(energy, y, text, shiftx=0):
-    plt.text(energy+shiftx, y, text, fontsize=10, rotation=90)
+def addEnergy(energy, y, text, shiftx=0, fontsize=10):
+    plt.text(energy+shiftx, y, text, fontsize=fontsize, rotation=90)
 
 
 if __name__=='__main__':
 
-    GATES_LIST = (1436, 444)
-    X_RANGE = (500, 900)
-    Y_RANGE = (0, 200)
-    SAVE_OUTPUT = True
+    GATES_LIST = (1436, 539)
+    X_RANGE = (300, 500)
+    Y_RANGE = (0, 100)
+    SAVE_OUTPUT = False
     PRELIMINARY = False
 
     gatename="g{}g{}".format(GATES_LIST[0], GATES_LIST[1])
     data = read_data(filename="gate_{}.txt".format(gatename), bg_filename='bg_{}.txt'.format(gatename))
     gamma_marks = pd.read_excel('gamma_marks_{}.xlsx'.format(gatename))
 
-    fig = plt.figure(figsize=(10, 4))
-    ax = fig.add_subplot()
+    # fig = plt.figure(figsize=(10, 4))
+    # ax = fig.add_subplot()
+
+    fig, ax = plt.subplots()
     ax.tick_params(axis='both', labelsize=14)
-    ax.set_xlabel('energy (keV)', fontsize=12)
-    ax.set_ylabel('counts', fontsize=12)
+    ax.set_xlabel('Energy (keV)', fontsize=12)
+    ax.set_ylabel('Number of counts', fontsize=12)
     plt.subplots_adjust(bottom=0.15)
 
     plt.ylim(Y_RANGE[0], Y_RANGE[1])
@@ -65,22 +68,23 @@ if __name__=='__main__':
     box_width = 0.2 * (ax.get_xlim()[1] - ax.get_xlim()[0])
     box_height = 0.1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
 
-    ax.text(ax.get_xlim()[1]-1.2*box_width, ax.get_ylim()[1]-1.1*box_height, "gate {} & {} keV ".format(GATES_LIST[0], GATES_LIST[1]), fontsize=12)
+    ax.text(ax.get_xlim()[1]-1.2*box_width, ax.get_ylim()[1]-1.1*box_height, "gate {} - {} keV ".format(GATES_LIST[0], GATES_LIST[1]), fontsize=12)
 
 
 
     #adding marks:
     for index, gamma in gamma_marks.iterrows():
         if gamma.type == 'text':
-            addEnergy(energy=int(gamma.energy), text="{}: {} keV".format(gamma.isotope, gamma.energy), y=gamma.y, shiftx=gamma.shiftx)
+            addEnergy(energy=int(gamma.energy), text="{} ({})".format(gamma.energy, gamma.isotope), y=gamma.y, shiftx=gamma.shiftx, fontsize=12)
         elif gamma.type == 'arrow':
-            addArrow(x=int(gamma.energy), text="{}: {} keV".format(gamma.isotope, gamma.energy), y=gamma.y, length=gamma.length, shiftx=gamma.shiftx)
-
+            addArrow(x=int(gamma.energy), text="{} ({})".format(gamma.energy, gamma.isotope), y=gamma.y, length=gamma.length, shiftx=gamma.shiftx)
+        elif gamma.type == 'sign':
+            addEnergy(energy=int(gamma.energy), text="{}".format(gamma.isotope), y=gamma.y, shiftx=gamma.shiftx, fontsize=20)
 
     # plotting the data
-    plt.plot(data.spectrum, ds='steps-mid', color='black', lw=1)
+    plot, = plt.plot(data.spectrum, drawstyle='steps-mid', color='black', lw=1)
     if 'bg' in data.columns:
-        plt.plot(data.bg, ds='steps-mid', lw=1, color="#FF7F00")
+        plt.plot(data.bg, drawstyle='steps-mid', lw=1, color="#FF7F00")
 
     # plt.plot(data.spectrum-data.bg, ds='steps-mid', lw=1)
 
@@ -94,7 +98,43 @@ if __name__=='__main__':
     if SAVE_OUTPUT:
         plt.savefig("Output/{}_{}-{}.svg".format(gatename, int(ax.get_xlim()[0]), int(ax.get_xlim()[1])))
         plt.savefig("Output/{}_{}-{}.png".format(gatename, int(ax.get_xlim()[0]), int(ax.get_xlim()[1])))
-    plt.show()
+    # plt.show()
 
 
 
+
+
+
+class Index(object):
+    ind = 0
+    step = 100
+
+    def next(self, event):
+        self.ind +=1
+        start, stop = ax.get_xlim()
+        ax.set_xlim(int(start) + 100, int(stop) + 100)
+        self._updatePlot()
+
+    def prev(self, event):
+        self.ind -= 1
+        start, stop = ax.get_xlim()
+        ax.set_xlim(int(start) - 100, int(stop) - 100)
+        self._updatePlot()
+
+    def _updatePlot(self):
+        ax.autoscale(axis='y')
+        plt.draw()
+
+
+Index.start_point=200
+Index.stop_point=500
+callback = Index()
+axprev = plt.axes([0.7, 0.05, 0.1, 0.075]) #button coordinates and size
+axnext = plt.axes([0.81, 0.05, 0.1, 0.075])
+bnext = Button(axnext, 'Next')
+bprev = Button(axprev, 'Previous')
+
+bnext.on_clicked(callback.next)
+bprev.on_clicked(callback.prev)
+
+plt.show()
