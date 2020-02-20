@@ -1,6 +1,9 @@
 Output
+Gates_all
+Marks
 *.xlsx
 test.py
-gate_*
-bg_*
+spectrum_plotter.py
 .idea
+.gitignore
+*pyc

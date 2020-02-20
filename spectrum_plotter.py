@@ -4,6 +4,8 @@ from matplotlib import rc
 import pandas as pd
 from matplotlib.gridspec import GridSpec
 
+
+
 def read_data(filename, bg_filename=''):
     #prepare Data Frame
     spect = pd.read_csv(filename, skiprows=1, names=['spectrum'])
@@ -37,8 +39,8 @@ if __name__=='__main__':
 
     GATES_LIST = (1436, 444)
     X_RANGE = (500, 900)
-    Y_RANGE = (0, 250)
-    SAVE_OUTPUT = False
+    Y_RANGE = (0, 200)
+    SAVE_OUTPUT = True
     PRELIMINARY = False
     MARK = True
     LATEX = True
@@ -85,7 +87,7 @@ if __name__=='__main__':
     box_width = (-0.058*fig.get_size_inches()[0]+0.85) * (ax.get_xlim()[1] - ax.get_xlim()[0])
     box_height = 0.1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
 
-    gt = ax.text(ax.get_xlim()[1]-1.2*box_width, ax.get_ylim()[1]-1.1*box_height, "gate {} - {} keV ".format(GATES_LIST[0], GATES_LIST[1]), fontsize=FONT_SIZE)
+    gt = ax.text(ax.get_xlim()[1]-1.35*box_width, ax.get_ylim()[1]-1.1*box_height, "gates {} - {} keV  (a)".format(GATES_LIST[0], GATES_LIST[1]), fontsize=FONT_SIZE)
 
 
     #adding marks:
