@@ -63,22 +63,14 @@ class ClickCatcher:
         return self.data_x, self.data_y
 
     def remove_plot(self):
-        self.points.remove()  # TODO: check if its ok
+        self.points.remove()
         self.window.fig.canvas.draw()
 
 
 class PeakCatcher(ClickCatcher):
 
     def initialize_plotting(self):
-        return self.window.ax.plot([], [], marker='.', ls='None', color='blue')[0]
-
-
-
-
-
-
-
-
+        return self.window.ax.plot([], [], marker='x', ls='None', color='black')[0]
 
 
 class SpectrumSelector:
@@ -98,6 +90,7 @@ class SpectrumSelector:
             plt.draw()
 
     def set_non_event_selection(self, line2d_obj):
+        # for auto selection when spectrum is added to the plot
         self.selected_spectrum = line2d_obj
         self.selected_spectrum.set_linewidth(1)
 

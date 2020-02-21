@@ -16,6 +16,7 @@ class Peak:
 
 
 class PeakFitter:
+    ith_fit = 0
 
     def __init__(self, data_x, data_y, peaks):
         self.data_x = data_x
@@ -24,8 +25,8 @@ class PeakFitter:
 
         self.params = Parameters()
         self._initialize_params()
-
-
+        
+        
     def _initialize_params(self):
         # initialize params for gaussian curves
         for i, peak in enumerate(self.peaks):
@@ -56,6 +57,8 @@ class PeakFitter:
         return (model - data_y) / sigma
 
     def fit_all(self):
+        PeakFitter.ith_fit += 1
+
         myfit = Minimizer(self.residual, self.params,
                           fcn_args=(self.data_x,), fcn_kws={'data_y': self.data_y},
                           scale_covar=True)
