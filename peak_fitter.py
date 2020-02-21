@@ -22,11 +22,13 @@ class PeakFitter:
         self.data_x = data_x
         self.data_y = data_y
         self.peaks = peaks
+        self.result = None
+        self.init = None
+        self.fit = None
 
         self.params = Parameters()
         self._initialize_params()
-        
-        
+
     def _initialize_params(self):
         # initialize params for gaussian curves
         for i, peak in enumerate(self.peaks):
@@ -39,8 +41,10 @@ class PeakFitter:
         self.params.add(name='line_off', value=0.0)
 
     def _gaussian_peaks(self, params, data_x):
-        return sum(gaussian(data_x, params[f'amp_{i}'], params[f'cen_{i}'], params[f'wid_{i}'])
-                   for i, peak in enumerate(self.peaks))
+        return sum(
+            gaussian(data_x, params[f'amp_{i}'], params[f'cen_{i}'], params[f'wid_{i}'])
+            for i, peak in enumerate(self.peaks)
+        )
 
     def _linear_background(self, params, data_x):
         slope = params['line_slope']
@@ -72,9 +76,5 @@ class PeakFitter:
     def get_result(self):
         x = arange(self.data_x[0], self.data_x[-1], 0.1)
         return x, self.residual(self.result.params, x)
-
-    # def plot(self, ax):
-    #     ax.plot(self.data_x, self.fit, 'k-', label='best fit')
-    #
 
 

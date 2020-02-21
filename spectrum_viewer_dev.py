@@ -13,25 +13,23 @@ import settings
 class PlotManager:
 
     def __init__(self, window_object):
-        self.numb_of_plots = 0
         self.window_object = window_object
         self.name_to_line2d = {}
 
         self.plot_setup = {}
 
     def add_plot(self, name, data_x, data_y):
-        self.numb_of_plots += 1
         if name in self.name_to_line2d.keys():
-            print('The {} was already plotted.'.format(name))
+            print('The {} keV has been already plotted.'.format(name))
             return None
         else:
-            line2d_obj, = self.window_object.ax.plot(data_x, data_y, **self.plot_setup)
+            line2d_obj, = self.window_object.ax.plot(
+                data_x, data_y, **self.plot_setup
+            )
             self.name_to_line2d[name] = line2d_obj
             return line2d_obj
 
     def remove_plot(self, name):
-        self.numb_of_plots -= 1
-
         # remove from plot
         self.window_object.ax.lines.remove(self.name_to_line2d[name])
         # remove from PlotManager registry
@@ -53,6 +51,7 @@ class Window:
     KEYMAP = settings.KEYMAP
 
     def __init__(self):
+        self.bins = settings.SPECTRUM_BINS
         self.is_autoscale_on = False
         self.is_click_catcher_working = False
         self.click_data = ([], [])
@@ -72,16 +71,23 @@ class Window:
         self.fit_plot_manager = PlotManager(self)
         self.fit_plot_manager.plot_setup = settings.FIT_PLOT_SETUP
 
-        self.fit_plots = []
-
         self._selected_spectrum = None
         self._gate_name = ''
-        self.gate_name_box = self.ax.text(
-            self.ax.get_xlim()[1] - 1.1 * self.gate_box_width,
-            self.ax.get_ylim()[1] - 1.1 * self.gate_box_height,
-            "{}".format(self._gate_name),
-            fontsize=settings.FONTSIZE
+
+        self.gate_name_box = plt.gcf().text(
+            s=self.gate_name, **settings.GATE_NAME_BOX_SETUP
         )
+
+    @property
+    def gate_name(self):
+        return self._gate_name
+
+    @gate_name.setter
+    def gate_name(self, value):
+        # update gate name text box
+        self.gate_name_box.set_text(f'{value}')
+
+        self._gate_name = value
 
     @property
     def selected_spectrum(self):
@@ -91,17 +97,15 @@ class Window:
     def selected_spectrum(self, value):
         if value:
             try:
-                self._gate_name = self.spect_plot_manager.line2d_to_name[value.__repr__()]
+                self.gate_name = self.spect_plot_manager.line2d_to_name[value.__repr__()]
             except KeyError:
-                self._gate_name = self.fit_plot_manager.line2d_to_name[value.__repr__()]
+                self.gate_name = self.fit_plot_manager.line2d_to_name[value.__repr__()]
         else:
-            self._gate_name = ''
-        self.gate_name_box.set_text("{}".format(self._gate_name))
+            self.gate_name = ''
         self._selected_spectrum = value
         self._update_plot()
 
     def catch_coordinates(self):
-
         click = ClickCatcher(self)
         self.click_data = click.get_data()
 
@@ -112,12 +116,9 @@ class Window:
             self.is_click_catcher_working = True
             self.catch_coordinates()
 
-
-
     def catch_points_for_fitting(self):
         self.fit_click = PeakCatcher(self)
         self.click_data_for_fit = self.fit_click.get_data()
-
 
     def do_fit(self, event):
         # read selected main points for fit
@@ -141,7 +142,7 @@ class Window:
 
         # plot result
         self.fit_plot_manager.add_plot(
-            f'fit_{PeakFitter.ith_fit}_{self._gate_name}', result_x, result_y
+            f'fit_{PeakFitter.ith_fit}_{self.gate_name}', result_x, result_y
         )
 
         # disconnect catching points for fit
@@ -156,13 +157,8 @@ class Window:
             self.is_click_catcher_working = True
             self.catch_points_for_fitting()
 
-
     def print_marked_points(self, event):
-        # print(self.fit_plots)
-        print(self.spect_plot_manager.name_to_line2d)
-
-        self.print_points()
-
+        self.print_points()  # TODO: save to the output file
 
     def print_points(self):
         output = '({:.2f}, {:.2f}) ; '*len(self.click_data[0])
@@ -190,11 +186,6 @@ class Window:
     def _update_plot(self):
         if self.is_autoscale_on:
             self._y_axis_autoscale()
-        self.gate_name_box.set_position(
-            [self.ax.get_xlim()[1] - settings.GATE_BOX_X_POSITION_FACTOR * self.gate_box_width,
-             self.ax.get_ylim()[1] - settings.GATE_BOX_Y_POSITION_FACTOR * self.gate_box_height]
-        )
-
         plt.draw()
 
     @staticmethod
@@ -211,7 +202,7 @@ class Window:
     def open_file_dialog():
         root = tk.Tk()
         root.withdraw()
-        file_path = filedialog.askopenfilename()
+        file_path = filedialog.askopenfilename(filetypes=settings.DATA_FILETYPES)
         print(f'{file_path} file opened.')
         return file_path
 
@@ -234,11 +225,11 @@ class Window:
     def remove_plot(self, event):
         try:
             # remove selected spectrum plot
-            self.spect_plot_manager.remove_plot(self._gate_name)
+            self.spect_plot_manager.remove_plot(self.gate_name)
 
             # clear fit plots which belong to removed spectrum
             for name in self.fit_plot_manager.line2d_to_name.values():
-                if name.endswith(self._gate_name):
+                if name.endswith(self.gate_name):
                     self.fit_plot_manager.remove_plot(name)
 
             # auto-select another spectrum if there still is another plot
@@ -257,9 +248,9 @@ class Window:
 
     def show_peak(self, text):
         peak = eval(text)
+        d = int(settings.SHOW_PEAK_WINDOW_WIDTH/2)
         try:
-            self.ax.set_xlim(peak - 200, peak + 200)
-
+            self.ax.set_xlim(peak - d, peak + d)
         except:
             print('Incorrect energy.')
         self._y_axis_autoscale()
@@ -267,7 +258,7 @@ class Window:
 
     def save_svg(self, event):
         filename = "{}_{}-{}.svg".format(
-            self._gate_name.replace(' ', ''),
+            self.gate_name.replace(' ', ''),
             int(self.ax.get_xlim()[0]),
             int(self.ax.get_xlim()[1])
         )
@@ -284,7 +275,7 @@ class Window:
         else:
             self.is_autoscale_on = False
         self._update_plot()
-        print('Y autoscale set {}'.format(label))
+        print(f'Y autoscale set {label}')
 
     def set_logscale(self, label):
         if label == 'on':
@@ -292,8 +283,7 @@ class Window:
         else:
             self.ax.set_yscale('linear')
         self._update_plot()
-        print('Y log set {}'.format(label))
-
+        print(f'Y log set {label}')
 
     def _y_axis_autoscale(self):
         try:
@@ -302,8 +292,18 @@ class Window:
             data_y = self.selected_spectrum.get_data(orig=True)[1]
             spect_slice = data_y[int(x1): int(x2)]
             self.ax.set_ylim(0, 1.2 * max(spect_slice))
-        except (ValueError, AttributeError):
-            self.rbutton_name_autoscale.set_active(0)  # TODO: maybe put it in some other place
+
+        except (ValueError, AttributeError) as error:
+            print(f'{error}. You can\'t use autoscale now.')
+            self.rbutton_name_autoscale.set_active(0)
+
+    def show_all(self, event):
+        try:
+            x1, *_, x2 = self.selected_spectrum.get_data(orig=True)[0]
+            self.ax.set_xlim(x1, x2)
+            self._y_axis_autoscale()
+        except AttributeError:
+            # if there is no spectrum just do nothing
             pass
 
     @staticmethod
@@ -394,6 +394,7 @@ class Window:
         # plt.gcf() let us use figure coordinates instead of axis coordinates
         for text, coords in settings.TEXT_FRAMES.items():
             plt.gcf().text(*coords, text, fontsize=settings.BUTTONS_FONTSIZE)
+
 
 if __name__ == '__main__':
 

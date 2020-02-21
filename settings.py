@@ -1,4 +1,4 @@
-
+SPECTRUM_BINS = 4096
 
 # button height
 BH = 0.05
@@ -20,11 +20,12 @@ BUTTONS = {
     "mark_peaks": ([0.27, 0.01, BW, BH], 'Mark', '_activate_marking'),
     "save_points": ([0.34, 0.01, BW, BH], 'Print', 'print_marked_points'),
     "remove": ([0.12, 0.92, BW, BH], 'remove', 'remove_plot'),
-    "add_gate": ([0.05, 0.92, BW, BH], 'add', 'add_spectrum_from_file')
+    "add_gate": ([0.05, 0.92, BW, BH], 'add', 'add_spectrum_from_file'),
+    "show_all": ([0.8, 0.01, BW, BH], 'Show all', 'show_all')
 }
 
 TEXT_BOXES = {
-    "search_gamma": ([0.92, 0.92, BW, 0.075], 'Energy', 0.05, 'show_peak'),
+    "search_gamma": ([0.92, 0.92, BW, BH], 'Show energy', 0.05, 'show_peak'),
 }
 
 RADIO_BUTTONS = {
@@ -64,6 +65,7 @@ BUTTONS_FONTSIZE = 9
 LABELS_SIZE = 14
 
 INITIAL_X_AXIS_LIMITS = (0, 500)
+SHOW_PEAK_WINDOW_WIDTH = 400
 
 GATE_BOX_HEIGHT_FACTOR = 0.1
 GATE_BOX_WIDTH_FACTOR = 0.2
@@ -94,3 +96,15 @@ FIT_PLOT_SETUP = {
     'picker': 10
 }
 
+GATE_NAME_BOX_SETUP = {
+    'x': 0.9,
+    'y': 0.85,
+    'fontsize': 12,
+    'horizontalalignment': 'right'
+}
+
+DATA_FILETYPES = [
+    ('txt', '*.txt'),
+    ('hdf5', '*.h5'),
+    ('all', '*.*')
+]
