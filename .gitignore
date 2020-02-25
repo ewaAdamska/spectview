@@ -1,5 +1,7 @@
 Output
 Gates_all
+Fits
+Peaks
 Marks
 *.xlsx
 test.py
@@ -7,3 +9,4 @@ spectrum_plotter.py
 .idea
 .gitignore
 *pyc
+data_reader.py

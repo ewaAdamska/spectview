@@ -27,10 +27,14 @@ class DataSet:
         self.gate = gate
 
     @classmethod
-    def from_txt(cls, file):  # TODO: add from_hdf5 method
+    def from_txt(cls, file):
         spectrum = np.genfromtxt(file, dtype=int)
         gate = GateInfo(filename=file)
         return cls(spectrum=spectrum, gate=gate)
+
+    @classmethod
+    def from_hdf5(cls, file):  # TODO: implement it!
+        pass
 
     def get_spectrum(self, slicing=None):
         if not slicing:

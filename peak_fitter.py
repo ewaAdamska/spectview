@@ -3,7 +3,7 @@ from numpy import linspace, random, arange
 
 from lmfit import Minimizer, Parameters
 from lmfit.lineshapes import gaussian, lorentzian
-from lmfit.printfuncs import report_fit
+from lmfit.printfuncs import report_fit, fit_report
 
 
 class Peak:
@@ -77,4 +77,8 @@ class PeakFitter:
         x = arange(self.data_x[0], self.data_x[-1], 0.1)
         return x, self.residual(self.result.params, x)
 
+
+    def generate_fit_report(self):
+        report = f'\n\n{"="*10}\nFIT REPORT\n{"="*10}\n\n'
+        return report + fit_report(self.result.params)
 

@@ -17,11 +17,12 @@ BUTTONS = {
     "save": ([0.92, 0.85, BW, BH], 'Save', 'save_svg'),
     "fit_range": ([0.05, 0.01, BW, BH], 'Fit range', '_activate_marking_for_fit'),
     "do_fit": ([0.12, 0.01, BW, BH], 'Fit', 'do_fit'),
+    "report_fit": ([0.19, 0.01, BW, BH], 'Report fit', 'report_fit'),
     "mark_peaks": ([0.27, 0.01, BW, BH], 'Mark', '_activate_marking'),
-    "save_points": ([0.34, 0.01, BW, BH], 'Print', 'print_marked_points'),
+    "save_points": ([0.34, 0.01, BW, BH], 'Report points', 'print_marked_points'),
     "remove": ([0.12, 0.92, BW, BH], 'remove', 'remove_plot'),
     "add_gate": ([0.05, 0.92, BW, BH], 'add', 'add_spectrum_from_file'),
-    "show_all": ([0.8, 0.01, BW, BH], 'Show all', 'show_all')
+    "show_all": ([0.75, 0.01, BW, BH], 'Show all', 'show_all')
 }
 
 TEXT_BOXES = {
@@ -67,12 +68,9 @@ LABELS_SIZE = 14
 INITIAL_X_AXIS_LIMITS = (0, 500)
 SHOW_PEAK_WINDOW_WIDTH = 400
 
-GATE_BOX_HEIGHT_FACTOR = 0.1
-GATE_BOX_WIDTH_FACTOR = 0.2
-GATE_BOX_X_POSITION_FACTOR = 0.75
-GATE_BOX_Y_POSITION_FACTOR = 1.1
-
 OUTPUT_FIGURES_PATH = 'Output/'
+OUTPUT_MARKED_PEAKS_PATH = './Peaks/'
+OUTPUT_FIT_RESULTS_PATH = './Fits/'
 
 X_AXIS_MOVING_FACTOR = 0.15
 Y_AXIS_MOVING_FACTOR = 0.15

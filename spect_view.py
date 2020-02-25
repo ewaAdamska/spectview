@@ -54,7 +54,10 @@ class Window:
         self.bins = settings.SPECTRUM_BINS
         self.is_autoscale_on = False
         self.is_click_catcher_working = False
-        self.click_data = ([], [])
+        self.click_data = None
+        self.fit_click = None
+        self.click_data_for_fit = None
+        self.peak_fit = None
 
         self.fig, self.ax = plt.subplots()
         self.configure_appearance()
@@ -122,33 +125,39 @@ class Window:
 
     def do_fit(self, event):
         # read selected main points for fit
-        fit_peaks = [
-            Peak(cen, amp) for cen, amp in zip(
-                self.click_data_for_fit[0][1:-1],
-                self.click_data_for_fit[1][1:-1]
+        try:
+            fit_peaks = [
+                Peak(cen, amp) for cen, amp in zip(
+                    self.click_data_for_fit[0][1:-1],
+                    self.click_data_for_fit[1][1:-1]
+                )
+            ]
+
+            fit_range = [
+                int(self.click_data_for_fit[0][0]),
+                int(self.click_data_for_fit[0][-1])
+            ]
+            # print(f'range {fit_range} and peaks:\n{fit_peaks}')
+
+            data_x, data_y = self.selected_spectrum.get_data()
+            data_x = data_x[fit_range[0]: fit_range[1]]
+            data_y = data_y[fit_range[0]: fit_range[1]]
+
+            # calculate fit
+            self.peak_fit = PeakFitter(data_x=data_x, data_y=data_y, peaks=fit_peaks)
+            self.peak_fit.fit_all()
+            result_x, result_y = self.peak_fit.get_result()
+
+            # plot result
+            self.fit_plot_manager.add_plot(
+                f'fit_{PeakFitter.ith_fit}_{self.gate_name}', result_x, result_y
             )
-        ]
-        fit_range = [int(self.click_data_for_fit[0][0]), int(self.click_data_for_fit[0][-1])]
-        print(f'range {fit_range} and peaks:\n{fit_peaks}')
 
-        data_x, data_y = self.selected_spectrum.get_data()
-        data_x = data_x[fit_range[0]: fit_range[1]]
-        data_y = data_y[fit_range[0]: fit_range[1]]
-
-        # calculate fit
-        peak_fit = PeakFitter(data_x=data_x, data_y=data_y, peaks=fit_peaks)
-        peak_fit.fit_all()
-        result_x, result_y = peak_fit.get_result()
-
-        # plot result
-        self.fit_plot_manager.add_plot(
-            f'fit_{PeakFitter.ith_fit}_{self.gate_name}', result_x, result_y
-        )
-
-        # disconnect catching points for fit
-        self.fit_click.disconnect()
-
-        plt.draw()
+            # disconnect catching points for fit
+            self.fit_click.disconnect()
+            plt.draw()
+        except (TypeError, ValueError, AttributeError):
+            print('No data for fit.')
 
     def _activate_marking_for_fit(self, event):
         if self.is_click_catcher_working:
@@ -157,14 +166,46 @@ class Window:
             self.is_click_catcher_working = True
             self.catch_points_for_fitting()
 
-    def print_marked_points(self, event):
-        self.print_points()  # TODO: save to the output file
+    def report_fit(self, event):
+        gate_name = self.gate_name.replace(' ', '')
+        file_name = f'fit_results_{gate_name}.txt'
+        file_path = settings.OUTPUT_FIT_RESULTS_PATH
+        file = os.path.join(file_path, file_name)
 
-    def print_points(self):
-        output = '({:.2f}, {:.2f}) ; '*len(self.click_data[0])
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        report = self.peak_fit.generate_fit_report()
+        with open(file, 'a') as f:
+            f.write(report)
+
+    def print_marked_points(self, event):
+        try:
+            result = self.get_clicked_points()
+            gate_name = self.gate_name.replace(' ', '')
+            file_name = f'peaks_{gate_name}.csv'
+            file_path = settings.OUTPUT_MARKED_PEAKS_PATH
+            file = os.path.join(file_path, file_name)
+
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
+
+            with open(file, 'a') as f:
+                f.write('E [keV], N\n')
+                f.write(result)
+
+            print(f'Marked points saved to the {file} file.')
+
+        except TypeError:
+            # when no data was selected
+            print('There aren\'t any marked points.')
+
+
+    def get_clicked_points(self):
+        output = '{:.2f}, {:.2f}\n'*len(self.click_data[0])
         xy_pairs = list(zip(*self.click_data))
         flat_list = [item for sublist in xy_pairs for item in sublist]
-        print(output.format(*flat_list))
+        return output.format(*flat_list)
 
     def configure_appearance(self):
         self.fig.set_size_inches(*settings.FIGURE_SIZE)
@@ -172,16 +213,6 @@ class Window:
         self.ax.set_ylabel('Number of counts', fontsize=settings.FONTSIZE)
         plt.subplots_adjust(**settings.WINDOW_SETUP)
         self.ax.set_xlim(*settings.INITIAL_X_AXIS_LIMITS)
-
-    @property
-    def gate_box_height(self):
-        factor = settings.GATE_BOX_HEIGHT_FACTOR
-        return factor * (self.ax.get_ylim()[1] - self.ax.get_ylim()[0])
-
-    @property
-    def gate_box_width(self):
-        factor = settings.GATE_BOX_WIDTH_FACTOR
-        return factor * (self.ax.get_xlim()[1] - self.ax.get_xlim()[0])
 
     def _update_plot(self):
         if self.is_autoscale_on:
@@ -241,7 +272,10 @@ class Window:
                 self.selected_spectrum = None
 
         except KeyError:
-            pass
+            # key error means slected line belonged to fit_plot_manager
+            # not spect_plot_manager
+            self.fit_plot_manager.remove_plot(self.gate_name)
+            self.selected_spectrum = None
 
         except ValueError:
             print("Nothing to clear.")
@@ -273,6 +307,7 @@ class Window:
         if label == 'on':
             self.is_autoscale_on = True
         else:
+            self.is_autoscale_on = False
             self.is_autoscale_on = False
         self._update_plot()
         print(f'Y autoscale set {label}')

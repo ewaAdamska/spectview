@@ -51,12 +51,13 @@ class ClickCatcher:
 
     def disconnect(self):
         self.window.fig.canvas.mpl_disconnect(self.cid)
+        self.window.fig.canvas.mpl_disconnect(self.cid_key)
         self.window.is_click_catcher_working = False
         self.remove_plot()
         print('Marking mode off.')
 
     def key_press(self, event):
-        if event.key == 'escape' or event.key == 'enter':
+        if event.key == 'escape':
             self.disconnect()
 
     def get_data(self):
@@ -70,7 +71,8 @@ class ClickCatcher:
 class PeakCatcher(ClickCatcher):
 
     def initialize_plotting(self):
-        return self.window.ax.plot([], [], marker='x', ls='None', color='black')[0]
+        return self.window.ax.plot([], [], marker='x', ls='None', color='red')[0]
+
 
 
 class SpectrumSelector:
