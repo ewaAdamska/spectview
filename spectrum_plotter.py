@@ -53,9 +53,9 @@ if __name__=='__main__':
 
     gatename="g{}g{}".format(GATES_LIST[0], GATES_LIST[1])
     try:
-        data = read_data(filename="Examples/gate_{}.txt".format(gatename), bg_filename='Examples/bg_{}.txt'.format(gatename))
+        data = read_data(filename="examples/gate_{}.txt".format(gatename), bg_filename='examples/bg_{}.txt'.format(gatename))
     except FileNotFoundError:
-        data = read_data(filename="Examples/gate_{}.txt".format(gatename))
+        data = read_data(filename="examples/gate_{}.txt".format(gatename))
 
     try:
         gamma_marks = pd.read_excel('gamma_marks_{}.xlsx'.format(gatename))
