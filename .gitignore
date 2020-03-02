@@ -10,4 +10,4 @@ spectrum_plotter.py
 .gitignore
 *pyc
 data_reader.py
-usage_video
+usage video
