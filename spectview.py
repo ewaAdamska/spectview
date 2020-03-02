@@ -4,43 +4,10 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-from plot_utils import ClickCatcher, SpectrumSelector, PeakCatcher
+from plot_utils import ClickCatcher, SpectrumSelector, PeakCatcher, PlotManager
 from datatypes import DataSet
 from peak_fitter import PeakFitter, Peak
 import settings
-
-
-class PlotManager:
-
-    def __init__(self, window_object):
-        self.window_object = window_object
-        self.name_to_line2d = {}
-
-        self.plot_setup = {}
-
-    def add_plot(self, name, data_x, data_y):
-        if name in self.name_to_line2d.keys():
-            print('The {} keV has been already plotted.'.format(name))
-            return None
-        else:
-            line2d_obj, = self.window_object.ax.plot(
-                data_x, data_y, **self.plot_setup
-            )
-            self.name_to_line2d[name] = line2d_obj
-            return line2d_obj
-
-    def remove_plot(self, name):
-        # remove from plot
-        self.window_object.ax.lines.remove(self.name_to_line2d[name])
-        # remove from PlotManager registry
-        del self.name_to_line2d[name]
-
-    def mark_plot(self, name):
-        self.name_to_line2d[name].set_linewidth(2)
-
-    @property
-    def line2d_to_name(self):
-        return {v.__repr__(): k for k, v in self.name_to_line2d.items()}
 
 
 class Window:
@@ -61,6 +28,7 @@ class Window:
 
         self.fig, self.ax = plt.subplots()
         self.configure_appearance()
+        self.configure_behaviour()
 
         self._add_buttons()
         self._add_text_boxes()
@@ -81,6 +49,12 @@ class Window:
             s=self.gate_name, **settings.GATE_NAME_BOX_SETUP
         )
 
+        plt.show()
+
+    @classmethod
+    def add_new_window(cls, event):
+        return cls()
+
     @property
     def gate_name(self):
         return self._gate_name
@@ -89,7 +63,6 @@ class Window:
     def gate_name(self, value):
         # update gate name text box
         self.gate_name_box.set_text(f'{value}')
-
         self._gate_name = value
 
     @property
@@ -112,7 +85,7 @@ class Window:
         click = ClickCatcher(self)
         self.click_data = click.get_data()
 
-    def _activate_marking(self, event):
+    def activate_marking(self, event):
         if self.is_click_catcher_working:
             pass
         else:
@@ -133,33 +106,36 @@ class Window:
                 )
             ]
 
+            # read fit x range
             fit_range = [
                 int(self.click_data_for_fit[0][0]),
                 int(self.click_data_for_fit[0][-1])
             ]
-            # print(f'range {fit_range} and peaks:\n{fit_peaks}')
 
+            # read data for fit in selected range
             data_x, data_y = self.selected_spectrum.get_data()
-            data_x = data_x[fit_range[0]: fit_range[1]]
-            data_y = data_y[fit_range[0]: fit_range[1]]
+            data_x = data_x[slice(*fit_range)]
+            data_y = data_y[slice(*fit_range)]
 
             # calculate fit
             self.peak_fit = PeakFitter(data_x=data_x, data_y=data_y, peaks=fit_peaks)
-            self.peak_fit.fit_all()
+            self.peak_fit.do_fit(verbosity=settings.FIT_VERBOSITY)
             result_x, result_y = self.peak_fit.get_result()
 
-            # plot result
+            # plot fit result
             self.fit_plot_manager.add_plot(
                 f'fit_{PeakFitter.ith_fit}_{self.gate_name}', result_x, result_y
             )
 
             # disconnect catching points for fit
             self.fit_click.disconnect()
-            plt.draw()
+
+            self._update_plot()
+
         except (TypeError, ValueError, AttributeError):
             print('No data for fit.')
 
-    def _activate_marking_for_fit(self, event):
+    def activate_marking_for_fit(self, event):
         if self.is_click_catcher_working:
             pass
         else:
@@ -200,18 +176,22 @@ class Window:
             # when no data was selected
             print('There aren\'t any marked points.')
 
-
     def get_clicked_points(self):
         output = '{:.2f}, {:.2f}\n'*len(self.click_data[0])
         xy_pairs = list(zip(*self.click_data))
         flat_list = [item for sublist in xy_pairs for item in sublist]
         return output.format(*flat_list)
 
+    def configure_behaviour(self):
+        # deactivate the default keymap
+        cid_default = self.fig.canvas.manager.key_press_handler_id
+        self.fig.canvas.mpl_disconnect(cid_default)
+
     def configure_appearance(self):
+        plt.subplots_adjust(**settings.WINDOW_SETUP)
         self.fig.set_size_inches(*settings.FIGURE_SIZE)
         self.ax.tick_params(axis='both', labelsize=settings.LABELS_SIZE)
-        self.ax.set_ylabel('Number of counts', fontsize=settings.FONTSIZE)
-        plt.subplots_adjust(**settings.WINDOW_SETUP)
+        self.ax.set_ylabel('Number of counts', fontsize=settings.LABELS_SIZE)
         self.ax.set_xlim(*settings.INITIAL_X_AXIS_LIMITS)
 
     def _update_plot(self):
@@ -272,8 +252,8 @@ class Window:
                 self.selected_spectrum = None
 
         except KeyError:
-            # key error means slected line belonged to fit_plot_manager
-            # not spect_plot_manager
+            # key error occurs when selected line was the fit_plot_manager object
+            # not spect_plot_manager object
             self.fit_plot_manager.remove_plot(self.gate_name)
             self.selected_spectrum = None
 
@@ -353,49 +333,49 @@ class Window:
     def y_axis_step(self):
         return settings.Y_AXIS_MOVING_FACTOR * (self.ax.get_ylim()[1] - self.ax.get_ylim()[0])
 
-    def _x_axis_view_next(self, event):
+    def x_axis_view_next(self, event):
         start, end = self.ax.get_xlim()
         step = self.x_axis_step
         self.ax.set_xlim(start + step, end + step)
         self._update_plot()
 
-    def _x_axis_view_prev(self, event):
+    def x_axis_view_prev(self, event):
         start, end = self.ax.get_xlim()
         step = self.x_axis_step
         self.ax.set_xlim(start - step, end - step)
         self._update_plot()
 
-    def _y_axis_view_up(self, event):
+    def y_axis_view_up(self, event):
         start, end = self.ax.get_ylim()
         step = self.y_axis_step
         self.ax.set_ylim(start + step, end + step)
         self._update_plot()
 
-    def _y_axis_view_down(self, event):
+    def y_axis_view_down(self, event):
         start, end = self.ax.get_ylim()
         step = self.y_axis_step
         self.ax.set_ylim(start - step, end - step)
         self._update_plot()
 
-    def _x_axis_expand_scale(self, event):
+    def x_axis_expand_scale(self, event):
         stretch_width = settings.X_AXIS_STRETCH_FACTOR
         x1, x2 = self.ax.get_xlim()
         self.ax.set_xlim(x1+stretch_width, x2-stretch_width)
         self._update_plot()
 
-    def _x_axis_collapse_scale(self, event):
+    def x_axis_collapse_scale(self, event):
         stretch_width = settings.X_AXIS_STRETCH_FACTOR
         x1, y2 = self.ax.get_xlim()
         self.ax.set_xlim(x1-stretch_width, y2+stretch_width)
         self._update_plot()
 
-    def _y_axis_expand_scale(self, event):
+    def y_axis_expand_scale(self, event):
         expand_factor = settings.Y_AXIS_EXPAND_SCALE_FACTOR
         y1, y2 = self.ax.get_ylim()
         self.ax.set_ylim(y1, expand_factor*y2)
         self._update_plot()
 
-    def _y_axis_collapse_scale(self, event):
+    def y_axis_collapse_scale(self, event):
         collapse_factor = settings.Y_AXIS_COLLAPSE_SCALE_FACTOR
         y1, y2 = self.ax.get_ylim()
         self.ax.set_ylim(y1, collapse_factor*y2)
@@ -434,5 +414,4 @@ class Window:
 if __name__ == '__main__':
 
     win = Window()
-    plt.show()
 

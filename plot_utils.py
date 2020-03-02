@@ -1,6 +1,38 @@
 import matplotlib.pyplot as plt
 
 
+class PlotManager:
+
+    def __init__(self, window_object):
+        self.window_object = window_object
+        self.name_to_line2d = {}
+        self.plot_setup = {}
+
+    def add_plot(self, name, data_x, data_y):
+        if name in self.name_to_line2d.keys():
+            print('The {} keV has been already plotted.'.format(name))
+            return None
+        else:
+            line2d_obj, = self.window_object.ax.plot(
+                data_x, data_y, **self.plot_setup
+            )
+            self.name_to_line2d[name] = line2d_obj
+            return line2d_obj
+
+    def remove_plot(self, name):
+        # remove from plot
+        self.window_object.ax.lines.remove(self.name_to_line2d[name])
+        # remove from PlotManager registry
+        del self.name_to_line2d[name]
+
+    def mark_plot(self, name):
+        self.name_to_line2d[name].set_linewidth(2)
+
+    @property
+    def line2d_to_name(self):
+        return {v.__repr__(): k for k, v in self.name_to_line2d.items()}
+
+
 class ClickCatcher:
 
     def __init__(self, window_obj):
@@ -17,7 +49,8 @@ class ClickCatcher:
         self.data_y = []
 
     def initialize_plotting(self):
-        return self.window.ax.plot([], [], marker='.', ls='None', color='red')[0]
+        import settings
+        return self.window.ax.plot([], [], **settings.CLICK_CATCHER_PLOT_SETUP)[0]
 
     def __call__(self, event):
         # ignore toolbar operations like zoom
@@ -50,8 +83,11 @@ class ClickCatcher:
         self.window.fig.canvas.draw()
 
     def disconnect(self):
+        # disconnect click-catching
         self.window.fig.canvas.mpl_disconnect(self.cid)
+        # disconnect key bounding
         self.window.fig.canvas.mpl_disconnect(self.cid_key)
+
         self.window.is_click_catcher_working = False
         self.remove_plot()
         print('Marking mode off.')
@@ -71,8 +107,8 @@ class ClickCatcher:
 class PeakCatcher(ClickCatcher):
 
     def initialize_plotting(self):
-        return self.window.ax.plot([], [], marker='x', ls='None', color='red')[0]
-
+        import settings
+        return self.window.ax.plot([], [], **settings.PEAK_CATCHER_PLOT_SETUP)[0]
 
 
 class SpectrumSelector:

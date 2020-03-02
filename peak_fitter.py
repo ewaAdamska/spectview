@@ -60,7 +60,7 @@ class PeakFitter:
             return model - data_y
         return (model - data_y) / sigma
 
-    def fit_all(self):
+    def do_fit(self, verbosity=False):
         PeakFitter.ith_fit += 1
 
         myfit = Minimizer(self.residual, self.params,
@@ -71,14 +71,15 @@ class PeakFitter:
         self.init = self.residual(self.params, self.data_x)
         self.fit = self.residual(self.result.params, self.data_x)
 
-        report_fit(self.result)
+        if verbosity:
+            # print fit details out
+            report_fit(self.result)
 
     def get_result(self):
         x = arange(self.data_x[0], self.data_x[-1], 0.1)
         return x, self.residual(self.result.params, x)
 
-
     def generate_fit_report(self):
-        report = f'\n\n{"="*10}\nFIT REPORT\n{"="*10}\n\n'
-        return report + fit_report(self.result.params)
+        report_header = f'\n\n{"="*10}\nFIT REPORT\n{"="*10}\n\n'
+        return report_header + fit_report(self.result.params)
 
