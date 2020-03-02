@@ -14,7 +14,6 @@ KEYMAP = {
     'ctrl+right': 'x_axis_expand_scale',
     'ctrl+left': 'x_axis_collapse_scale',
     'ctrl+down': 'y_axis_collapse_scale',
-    'm': 'activate_marking',
     'w': 'add_new_window',
     's': 'save_svg',
     'f': 'activate_marking_for_fit',
