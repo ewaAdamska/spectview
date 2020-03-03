@@ -43,8 +43,6 @@ sudo python3 setup.py install
 | b             | print marked points out       |
 | r             | remove selected spectrum      |
 | a             | add spectrum from file        |
-| z             | set y axis autoscale          |
-| x             | set y axis logscale           |
 
 ---
 ## Author

@@ -22,9 +22,7 @@ KEYMAP = {
     'v': 'activate_marking',
     'b': 'print_marked_points',
     'r': 'remove_plot',
-    'a': 'add_spectrum_from_file',
-    'z': 'set_autoscale',
-    'x': 'set_logscale'
+    'a': 'add_spectrum_from_file'
 }
 
 

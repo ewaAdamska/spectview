@@ -189,6 +189,7 @@ class Window:
 
     def configure_appearance(self):
         plt.subplots_adjust(**settings.WINDOW_SETUP)
+        self.fig.canvas.set_window_title('Spcetview')
         self.fig.set_size_inches(*settings.FIGURE_SIZE)
         self.ax.tick_params(axis='both', labelsize=settings.LABELS_SIZE)
         self.ax.set_ylabel('Number of counts', fontsize=settings.LABELS_SIZE)
