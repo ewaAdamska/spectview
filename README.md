@@ -19,7 +19,7 @@ sudo python3 setup.py install
 ```
 
 # Usage
-![example](examples/example.gif)
+![example](examples/fit.gif)
 
 **spectview** can be controled by keyboard. The keymap is presented in the table below.
 

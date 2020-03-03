@@ -63,6 +63,8 @@ class Window:
     def gate_name(self, value):
         # update gate name text box
         self.gate_name_box.set_text(f'{value}')
+        if value:
+            self.gate_name_box.set_c(self.selected_spectrum.get_c())
         self._gate_name = value
 
     @property
@@ -71,6 +73,9 @@ class Window:
 
     @selected_spectrum.setter
     def selected_spectrum(self, value):
+        self._selected_spectrum = value
+
+        # setting current spectrum name (self.gaten_name)
         if value:
             try:
                 self.gate_name = self.spect_plot_manager.line2d_to_name[value.__repr__()]
@@ -78,7 +83,6 @@ class Window:
                 self.gate_name = self.fit_plot_manager.line2d_to_name[value.__repr__()]
         else:
             self.gate_name = ''
-        self._selected_spectrum = value
         self._update_plot()
 
     def catch_coordinates(self):
@@ -234,6 +238,15 @@ class Window:
             self.ax.relim()
             self._update_plot()
 
+    def auto_select_next_plot(self):
+        # auto-select another spectrum if there still is another plot
+        if self.spect_plot_manager.name_to_line2d:
+            self.selected_spectrum = (
+                next(iter(self.spect_plot_manager.name_to_line2d.values()))
+            )
+        else:
+            self.selected_spectrum = None
+
     def remove_plot(self, event):
         try:
             # remove selected spectrum plot
@@ -245,18 +258,15 @@ class Window:
                     self.fit_plot_manager.remove_plot(name)
 
             # auto-select another spectrum if there still is another plot
-            if self.spect_plot_manager.name_to_line2d:
-                self.selected_spectrum = (
-                    next(iter(self.spect_plot_manager.name_to_line2d.values()))
-                )
-            else:
-                self.selected_spectrum = None
+            self.auto_select_next_plot()
 
         except KeyError:
             # key error occurs when selected line was the fit_plot_manager object
             # not spect_plot_manager object
             self.fit_plot_manager.remove_plot(self.gate_name)
             self.selected_spectrum = None
+            # auto-select another spectrum if there still is another plot
+            self.auto_select_next_plot()
 
         except ValueError:
             print("Nothing to clear.")
