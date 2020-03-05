@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from numpy import linspace, random, arange
 
 from lmfit import Minimizer, Parameters

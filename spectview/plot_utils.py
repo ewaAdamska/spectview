@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import spectview.settings as settings
 
 class PlotManager:
 
@@ -52,7 +52,6 @@ class ClickCatcher:
         self.data_y = []
 
     def initialize_plotting(self):
-        import settings
         return self.window.ax.plot([], [], **settings.CLICK_CATCHER_PLOT_SETUP)[0]
 
     def __call__(self, event):
@@ -110,7 +109,6 @@ class ClickCatcher:
 class PeakCatcher(ClickCatcher):
 
     def initialize_plotting(self):
-        import settings
         return self.window.ax.plot([], [], **settings.PEAK_CATCHER_PLOT_SETUP)[0]
 
 
