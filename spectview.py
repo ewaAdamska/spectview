@@ -4,10 +4,10 @@ import os
 import tkinter as tk
 from tkinter import filedialog
 
-from plot_utils import ClickCatcher, SpectrumSelector, PeakCatcher, PlotManager
-from datatypes import DataSet
-from peak_fitter import PeakFitter, Peak
-import settings
+from spectview.plot_utils import ClickCatcher, SpectrumSelector, PeakCatcher, PlotManager
+from spectview.datatypes import DataSet
+from spectview.peak_fitter import PeakFitter, Peak
+import spectview.settings as settings
 
 
 class Window:
