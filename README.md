@@ -30,7 +30,7 @@ sudo python3 setup.py install
 | left arrow    | x axis view move left     |
 | up arrow      | x axis view move up       |
 | down arrow    | x axis view move down     |
-| ctrl+up       | y axis_expand_scale       |
+| ctrl+up       | y axis expand scale       |
 | ctrl+right    | x axis expand scale       |
 | ctrl+left     | x axis collapse scale     |
 | ctrl+down     | y axis collapse scale     |

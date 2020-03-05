@@ -1,9 +1,9 @@
 venv
-Output
-Gates_all
-Fits
-Peaks
-Marks
+output
+gates_all
+fits
+peaks
+marks
 test.py
 spectrum_plotter.py
 .idea

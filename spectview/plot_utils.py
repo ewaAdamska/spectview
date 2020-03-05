@@ -20,10 +20,13 @@ class PlotManager:
             return line2d_obj
 
     def remove_plot(self, name):
-        # remove from plot
-        self.window_object.ax.lines.remove(self.name_to_line2d[name])
-        # remove from PlotManager registry
-        del self.name_to_line2d[name]
+        try:
+            # remove from plot
+            self.window_object.ax.lines.remove(self.name_to_line2d[name])
+            # remove from PlotManager registry
+            del self.name_to_line2d[name]
+        except KeyError:
+            print('Nothing to remove.')
 
     def mark_plot(self, name):
         self.name_to_line2d[name].set_linewidth(2)

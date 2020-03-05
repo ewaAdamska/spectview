@@ -1,0 +1,17 @@
+
+
+==========
+FIT REPORT
+==========
+
+[[Variables]]
+    amp_0:       217031.807 +/- 6734.25361 (3.10%) (init = 81769.54)
+    cen_0:       510.410541 +/- 0.04771391 (0.01%) (init = 510.6367)
+    wid_0:       1.63118728 +/- 0.05118858 (3.14%) (init = 1)
+    line_slope: -88.6459296 +/- 51.8665520 (58.51%) (init = 0)
+    line_off:    68682.4778 +/- 26523.9794 (38.62%) (init = 0)
+[[Correlations]] (unreported correlations are < 0.100)
+    C(line_slope, line_off) = -1.000
+    C(amp_0, wid_0)         =  0.659
+    C(cen_0, line_slope)    = -0.154
+    C(cen_0, line_off)      =  0.154

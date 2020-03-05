@@ -136,7 +136,7 @@ class Window:
 
             self._update_plot()
 
-        except (TypeError, ValueError, AttributeError):
+        except (TypeError, ValueError, AttributeError, IndexError):
             print('No data for fit.')
 
     def activate_marking_for_fit(self, event):
@@ -176,7 +176,7 @@ class Window:
 
             print(f'Marked points saved to the {file} file.')
 
-        except TypeError:
+        except (TypeError, AttributeError):
             # when no data was selected
             print('There aren\'t any marked points.')
 
@@ -193,7 +193,7 @@ class Window:
 
     def configure_appearance(self):
         plt.subplots_adjust(**settings.WINDOW_SETUP)
-        self.fig.canvas.set_window_title('Spcetview')
+        self.fig.canvas.set_window_title('Spectview')
         self.fig.set_size_inches(*settings.FIGURE_SIZE)
         self.ax.tick_params(axis='both', labelsize=settings.LABELS_SIZE)
         self.ax.set_ylabel('Number of counts', fontsize=settings.LABELS_SIZE)
@@ -268,7 +268,7 @@ class Window:
             # auto-select another spectrum if there still is another plot
             self.auto_select_next_plot()
 
-        except ValueError:
+        except (ValueError):
             print("Nothing to clear.")
 
     def show_peak(self, text):
