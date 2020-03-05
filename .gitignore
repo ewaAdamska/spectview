@@ -1,5 +1,5 @@
 venv
-output
+pictures
 gates_all
 fits
 peaks
@@ -11,3 +11,4 @@ spectrum_plotter.py
 *pyc
 data_reader.py
 videos
+spectview/*pyc
