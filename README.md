@@ -1,5 +1,5 @@
 # spectview
-spectview is the python3.6 tool for spcectroscopic data analysis. 
+The spectview is the python3.6 tool for spcectroscopic data analysis. 
 
 # Dependencies
 This application requires the following python3 packages:
@@ -20,22 +20,22 @@ sudo python3 setup.py install
 
 # Usage
 
-To run *spectview* open terminal in the repository path and type:
+To run **spectview** open terminal in the repository path and type:
 
 ```
 python3 spectview.py
 ```
  
- ####The spectview facilitate:
+ ###The spectview facilitate:
  * easy fitting of gaussian functons with linear background, fit report can be saved to the output file;
 ![example1](docs/gifs/single_fit.gif)
 
 * easy managing of the spectra in the one figure, every line, including lines from gaussian peaks, is responsive and can be easily removed;
 ![example2](docs/gifs/easy_selection.gif)
+![example4](docs/gifs/remove_fit_plot.gif)
 
 * easy peaks marking and reporting it
 ![example3](docs/gifs/easy_marking_small.gif)
-![example4](docs/gifs/remove_fit_plot.gif)
 
 * easy scale managing,
 ![example5](docs/gifs/log_scale.gif)
