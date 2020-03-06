@@ -11,7 +11,7 @@ class GateInfo:
         self.gammas_list = [int(x[1:]) for x in re.findall('g\d+', os.path.basename(self.filename))]
 
     def __repr__(self):
-        return self.filename.split('/')[-1]
+        return self.filename.split('/')[-1].split('.')[0]
 
     def __str__(self):
         return self.type_+' '+' - '.join([str(x) for x in self.gammas_list])
@@ -34,6 +34,7 @@ class DataSet:
         spectrum = np.genfromtxt(file, dtype=int)
         gate = GateInfo(filename=file)
         return cls(spectrum=spectrum, gate=gate)
+
 
     @classmethod
     def from_hdf5(cls, file):  # TODO: implement it!

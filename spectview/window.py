@@ -160,6 +160,8 @@ class Window:
         with open(file, 'a') as f:
             f.write(report)
 
+        print(f'The fit report saved to the {file} file.')
+
     def print_marked_points(self, event):
         try:
             result = self.get_clicked_points()
@@ -175,7 +177,7 @@ class Window:
                 f.write('E [keV], N\n')
                 f.write(result)
 
-            print(f'Marked points saved to the {file} file.')
+            print(f'The marked points saved to the {file} file.')
 
         except (TypeError, AttributeError):
             # when no data was selected
