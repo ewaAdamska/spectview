@@ -26,7 +26,7 @@ To run **spectview** open terminal in the repository path and type:
 python3 spectview.py
 ```
  
- ###The spectview facilitate:
+ **The spectview facilitate:**
  * easy fitting of gaussian functons with linear background, fit report can be saved to the output file;
 ![example1](docs/gifs/single_fit.gif)
 
