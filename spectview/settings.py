@@ -1,10 +1,5 @@
 SPECTRUM_BINS = 4096
 
-# button height
-BH = 0.05
-# button width
-BW = 0.07
-
 KEYMAP = {
     'right': 'x_axis_view_next',
     'left': 'x_axis_view_prev',
@@ -25,6 +20,10 @@ KEYMAP = {
     'a': 'add_spectrum_from_file'
 }
 
+# button height
+BH = 0.05
+# button width
+BW = 0.07
 
 BUTTONS = {
     'previous': ([0.43, 0.01, BW, BH], 'Prev', 'x_axis_view_prev'),

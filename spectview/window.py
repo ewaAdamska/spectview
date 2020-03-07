@@ -293,7 +293,10 @@ class Window:
         if not os.path.exists(settings.OUTPUT_FIGURES_PATH):
             os.makedirs(settings.OUTPUT_FIGURES_PATH)
 
-        plt.savefig(os.path.join(settings.OUTPUT_FIGURES_PATH, filename))
+
+        plt.savefig(
+            os.path.join(settings.OUTPUT_FIGURES_PATH, filename)
+        )
 
         print('File {} saved.'.format(filename))
 
